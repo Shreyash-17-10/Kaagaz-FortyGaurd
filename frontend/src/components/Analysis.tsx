@@ -28,7 +28,6 @@ import {
 } from "@/lib/api";
 import { Head, Stamp } from "./Stamp";
 
-
 type Tab = "ledger" | "baselines" | "frontier" | "provenance";
 
 const STRATEGY_LABEL: Record<string, string> = {
@@ -99,7 +98,6 @@ function Ledger({ plan }: { plan: Plan | null }) {
   const rows = [...plan.allocations].sort((a, b) => b.cost - a.cost);
   const unfunded = plan.block_groups_total - plan.block_groups_funded;
 
-  
   return (
     <>
       <Head
