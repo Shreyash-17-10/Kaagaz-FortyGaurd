@@ -1,12 +1,5 @@
 "use client";
 
-/**
- * The analysis panel: Ledger, Baselines, Equity frontier, Provenance.
- *
- * The Baselines tab deliberately shows columns where the optimizer loses. A comparison table that
- * wins everywhere would mean the baselines were built to lose.
- */
-
 import { Fragment, useState } from "react";
 import {
   Bar,
@@ -34,6 +27,7 @@ import {
   usdFull,
 } from "@/lib/api";
 import { Head, Stamp } from "./Stamp";
+
 
 type Tab = "ledger" | "baselines" | "frontier" | "provenance";
 
@@ -105,6 +99,7 @@ function Ledger({ plan }: { plan: Plan | null }) {
   const rows = [...plan.allocations].sort((a, b) => b.cost - a.cost);
   const unfunded = plan.block_groups_total - plan.block_groups_funded;
 
+  
   return (
     <>
       <Head
