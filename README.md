@@ -4,7 +4,9 @@
 
 Built for Georgia (5,869 block groups) using the American Forests **Tree Equity Score**, the **WRI Cities Data API**, and the **FortyGuard** heat API.
 
+
 ---
+
 
 ## What it does
 
@@ -19,7 +21,9 @@ The whole pipeline lives in one file, [`heatroi.py`](heatroi.py), and runs in fo
 
 Stage 4 runs on its own with no API key or network — it's the part most people want.
 
+
 ---
+
 
 ## The scoring model
 
@@ -41,7 +45,9 @@ Because opportunity is a **multiplier**, block groups that already meet their ca
 
 All weights live at the top of `heatroi.py` (`NEED_HEAT_WEIGHT`, `NEED_VULN_WEIGHT`, `OPPORTUNITY_MODE`, `REDLINE_BOOST`).
 
+
 ---
+
 
 ## Project structure
 
@@ -95,7 +101,9 @@ python3 heatroi.py all            # run everything, skipping unavailable stages
 
 Heavy dependencies are imported lazily, so `score` works with just pandas/numpy/openpyxl. `all` degrades gracefully: any stage missing a key, dependency, or network is skipped with a message, and scoring still runs.
 
+
 ---
+
 
 ## Output
 
@@ -123,7 +131,9 @@ Top 10 priorities:
    ...
 ```
 
+
 ---
+
 
 ## Notes
 
