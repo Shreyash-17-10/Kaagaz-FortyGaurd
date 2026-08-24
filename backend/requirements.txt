@@ -1,0 +1,38 @@
+# HeatROI — backend runtime requirements
+#
+# Derived by parsing the actual import graph of backend/*.py (ast, not guesswork), then checked
+# against what the code does when each package is absent. Five packages that the previous version
+# of this file pinned are NOT here:
+#
+#   geopandas, shapely, pyogrio, pyproj  — the AOI geometry is built with plain Python from the
+#                                          local GeoJSON; no projection or spatial-join library is
+#                                          used anywhere in the live code path.
+#   ortools                              — measured, not assumed: greedy attains the LP upper
+#                                          bound to <0.01% at all seven tested budgets, so a
+#                                          constraint solver would add 100+MB to buy nothing.
+#                                          See docs/architecture/05_optimization.md.
+#
+# They were only ever needed by backend/_legacy/optimizer.py, which is dead code retained for
+# reference and imported by nothing.
+#
+# Install:  pip install -r requirements.txt
+# Offline:  pip install --no-index --find-links <your wheel dir> -r requirements.txt
+
+# --- required: the API will not start without these ---
+fastapi>=0.115
+uvicorn>=0.30
+pydantic>=2.7          # v2 API only (field_validator); v1 will not work
+pandas>=2.1            # verified clean against pandas 3.x: no removed API is used
+numpy>=1.26
+
+# --- optional but recommended ---
+# scipy supplies an INDEPENDENT branch-and-bound re-solve of the same problem
+# (scipy.optimize.milp / HiGHS), which is how the optimizer's claim of optimality is cross-checked
+# rather than asserted. Without it the API still runs and still reports the LP upper-bound gap; it
+# simply reports milp_check.available = false and says why. Verified by simulating its absence.
+scipy>=1.11
+
+# --- test-only ---
+# starlette's TestClient needs an HTTP client library. Required only to run test_api.py and
+# test_contract.py, never at runtime.
+httpx>=0.27

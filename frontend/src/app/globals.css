@@ -1,0 +1,599 @@
+@import "maplibre-gl/dist/maplibre-gl.css";
+@import "tailwindcss";
+
+/* ==========================================================================
+   HeatROI — design tokens
+
+   A civic budgeting instrument, not an analytics SaaS: ledger paper, document
+   ink, tabular columns, rubber-stamped provenance. Every saturated colour is
+   spent on the heat ramp, so temperature is the only thing that shouts.
+
+   No webfonts (also removes a build-time network fetch). Monospace is the
+   display face because GEOIDs, unit counts and dollar columns are tabular data.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* ground + ink */
+  --ground: #e7e8e2;
+  --panel: #f7f7f4;
+  --panel-2: #eff0ea;
+  --ink: #16233d;
+  --ink-2: #4a5570;
+  --ink-3: #7d869b;
+  --rule: #c3c6bd;
+  --rule-2: #d7d9d1;
+
+  /* the heat ramp — the only saturated sequence in the palette */
+  --heat-0: #2e6e7e;
+  --heat-1: #62907c;
+  --heat-2: #e0be4c;
+  --heat-3: #d1762a;
+  --heat-4: #bf3a1f;
+
+  /* money reads as ledger ink, never as heat */
+  --fund: #1c5b3c;
+  --fund-soft: #dfe9e0;
+  --flag: #8f3a0c;
+  --flag-soft: #f5e6d8;
+
+  --mono: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "SF Mono", Menlo,
+    Consolas, "Liberation Mono", monospace;
+  --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+  --rail: 340px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* typographic utilities */
+
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Eyebrow labels. Used only where the label names a real section of the
+   instrument, never as decoration. */
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.figure {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.figure-sm {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.muted {
+  color: var(--ink-2);
+}
+.quiet {
+  color: var(--ink-3);
+  font-size: 12px;
+}
+
+/* surfaces */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  /* A whisper of elevation — enough to lift cards off the ledger ground so the layout stops
+     reading as a flat broadsheet, not so much that it turns into an analytics-SaaS drop shadow. */
+  box-shadow: 0 1px 2px rgba(22, 35, 61, 0.05), 0 2px 8px rgba(22, 35, 61, 0.03);
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.rule-t {
+  border-top: 1px solid var(--rule);
+}
+
+/* --------------------------------------------------------------------------
+   provenance stamps
+
+   ASSUMED values carry a diagonal hatch, so load-bearing guesses are visible
+   at a glance rather than on inspection.
+   -------------------------------------------------------------------------- */
+
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.stamp-measured {
+  color: var(--fund);
+}
+.stamp-derived {
+  color: #2e6e7e;
+}
+.stamp-assumed {
+  color: var(--flag);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 3px,
+    rgba(143, 58, 12, 0.16) 3px 5px
+  );
+}
+.stamp-refused {
+  color: var(--ink-3);
+  border-style: dashed;
+}
+
+/* An assumed FIGURE gets a dotted underline, so the hatch language carries
+   from the tag onto the number itself. */
+.assumed-value {
+  text-decoration: underline dotted var(--flag);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+}
+
+/* controls */
+
+.field {
+  display: block;
+  margin-bottom: 18px;
+}
+
+.field > .eyebrow {
+  display: block;
+  margin-bottom: 6px;
+}
+
+select,
+input[type="number"] {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 7px 8px;
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 2px;
+  appearance: none;
+  background: var(--rule);
+  border-radius: 0;
+  margin: 12px 0 4px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  background: var(--ink);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  background: var(--ink);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.toggle-row {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.toggle-row button {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 7px 4px;
+  border: 0;
+  border-right: 1px solid var(--rule);
+  background: var(--panel);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.toggle-row button:last-child {
+  border-right: 0;
+}
+.toggle-row button:hover {
+  background: var(--panel-2);
+}
+.toggle-row button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--panel);
+}
+
+.chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--panel);
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--fund-soft);
+  border-color: var(--fund);
+  color: var(--fund);
+}
+
+button.primary {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 11px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--ink);
+  color: var(--panel);
+  cursor: pointer;
+}
+
+button.primary:hover {
+  background: #0e1830;
+}
+button.primary:disabled {
+  background: var(--ink-3);
+  cursor: wait;
+}
+
+/* tables — appropriation schedule */
+
+table.ledger {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+table.ledger th {
+  text-align: left;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+}
+
+table.ledger td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--rule-2);
+  color: var(--ink);
+}
+
+table.ledger tbody tr:hover {
+  background: var(--panel-2);
+}
+.num {
+  text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+   provenance table
+
+   Notes run to 290 characters inside a 582px panel. As a fifth column the note
+   was squeezed to ~29px and cut mid-word, and a note that reads "REPLACE by
+   intersecting" and stops is a truncated disclosure. Fixed layout pins the four
+   factual columns; each note gets its own full-width row beneath its entry.
+   -------------------------------------------------------------------------- */
+
+table.ledger.prov {
+  table-layout: fixed;
+}
+
+/* Units like "sites per 1000 residents" must wrap rather than widen the table. */
+table.ledger.prov td.wrap,
+table.ledger.prov th.wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* The value row and its note row are one entry: only the note carries the rule. */
+table.ledger.prov tr.prov-head td {
+  border-bottom: 0;
+  padding-bottom: 3px;
+  vertical-align: top;
+}
+
+table.ledger.prov tr.prov-note td {
+  padding: 0 8px 9px;
+  font-family: var(--sans);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Hover must highlight the pair, not half of it. */
+table.ledger.prov tbody tr:hover {
+  background: transparent;
+}
+table.ledger.prov tbody tr.prov-head:hover,
+table.ledger.prov tbody tr.prov-head:hover + tr.prov-note,
+table.ledger.prov tbody tr.prov-note:hover {
+  background: var(--panel-2);
+}
+
+/* tabs */
+
+.tabs {
+  display: flex;
+  gap: 22px;
+  border-bottom: 1px solid var(--rule);
+  padding: 0 18px;
+  background: var(--panel);
+}
+
+.tabs button {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 12px 0 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.tabs button[aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--heat-4);
+}
+
+/* notes and warnings */
+
+.note {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  border-left: 2px solid var(--rule);
+  padding: 2px 0 2px 10px;
+}
+
+.warn {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6f2e0a;
+  background: var(--flag-soft);
+  border-left: 2px solid var(--flag);
+  padding: 9px 11px;
+}
+
+/* map chrome */
+
+.maplibregl-popup.hr-popup .maplibregl-popup-content {
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  padding: 0;
+  box-shadow: 0 6px 18px rgba(22, 35, 61, 0.18);
+  font-family: var(--mono);
+}
+
+.maplibregl-popup.hr-popup .maplibregl-popup-tip {
+  border-top-color: var(--ink);
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 9px !important;
+}
+
+/* quality floor */
+
+:focus-visible {
+  outline: 2px solid var(--heat-4);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: var(--panel-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--rule);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   live feedback
+
+   The instrument now recomputes as you move a control, so it must SAY it is
+   working: a sweeping bar for in-flight requests, a pulsing status dot, and
+   count-up figures (tweened in page.tsx). All are damped by the
+   prefers-reduced-motion rule above.
+   -------------------------------------------------------------------------- */
+
+/* Thin sweep across the top of the workspace whenever a request is in flight. */
+.progressbar {
+  position: relative;
+  height: 2px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: transparent;
+}
+.progressbar.on::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--heat-3),
+    var(--heat-4),
+    transparent
+  );
+  animation: sweep 900ms ease-in-out infinite;
+}
+@keyframes sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(330%);
+  }
+}
+
+/* Live-status pill — replaces the old Allocate button. Green + slow halo when idle and current;
+   amber + blink while a recompute is in flight. Still clickable to force a run. */
+.livepill {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 11px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+.livepill:hover {
+  background: var(--panel-2);
+}
+.livepill:disabled {
+  cursor: not-allowed;
+  color: var(--ink-3);
+}
+.livepill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ink-3);
+}
+.livepill.idle {
+  border-color: var(--fund);
+  color: var(--fund);
+}
+.livepill.idle .dot {
+  background: var(--fund);
+  animation: halo 2.4s ease-out infinite;
+}
+.livepill.busy {
+  border-color: var(--heat-3);
+  color: var(--flag);
+}
+.livepill.busy .dot {
+  background: var(--heat-3);
+  animation: blink 800ms ease-in-out infinite;
+}
+@keyframes halo {
+  0% {
+    box-shadow: 0 0 0 0 rgba(28, 91, 60, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(28, 91, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(28, 91, 60, 0);
+  }
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

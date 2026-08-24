@@ -1,0 +1,28 @@
+# Secrets — never commit
+.env
+
+# Generated / large data artefacts
+data/wri_tree_opportunity.tif
+data/wri_tree_opportunity.geojson
+data/heat_roi_scores.csv
+data/heat_roi_top50.csv
+data/fortyguard_stats.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Frontend (Next.js) — regenerated locally, never commit
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Backend — local virtualenv
+backend/.venv/
+
+# OS
+.DS_Store
