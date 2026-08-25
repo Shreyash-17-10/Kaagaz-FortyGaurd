@@ -96,22 +96,11 @@ function Ledger({ plan }: { plan: Plan | null }) {
   if (!plan) return <Empty>Set a budget and allocate to see the schedule.</Empty>;
 
   const rows = [...plan.allocations].sort((a, b) => b.cost - a.cost);
-  const unfunded = plan.block_groups_total - plan.block_groups_funded;
 
   return (
     <>
       <Head
-        note={
-          <>
-            {plan.line_items} line items across {plan.block_groups_funded} block groups.{" "}
-            {unfunded > 0 && (
-              <>
-                <b>{unfunded} block groups receive nothing</b> at this budget — visible in the
-                map&apos;s Plan view.
-              </>
-            )}
-          </>
-        }
+        note={`${plan.line_items} line items · ${plan.block_groups_funded} of ${plan.block_groups_total} block groups funded`}
       >
         Appropriation schedule
       </Head>
@@ -206,8 +195,7 @@ function BaselinePanel({ b }: { b: Baselines | null }) {
       <Head
         note={
           <>
-            All four strategies face the same budget, capacities and costs. The naive heat-only
-            policy — the one a heat map on its own suggests — comes out{" "}
+            Hottest-first — what a heat map alone suggests — is{" "}
             <b>{Math.abs(b.strategies.hottest_first?.vs_optimized_pct ?? 0).toFixed(1)}% worse</b>.
           </>
         }
@@ -306,14 +294,6 @@ function BaselinePanel({ b }: { b: Baselines | null }) {
             })}
           </tbody>
         </table>
-      </div>
-
-      <div className="note" style={{ marginTop: 14 }}>
-        Read the highlighted <span style={{ color: "var(--flag)", fontWeight: 600 }}>people
-        reached</span> figures carefully. A naive strategy beating the optimizer there is not a
-        bug: the optimizer is optimal on <i>the objective it was given</i>, and priority-weighted
-        area is not the same as reaching the most residents. Select the people-reached objective
-        if that is the goal.
       </div>
     </>
   );
@@ -423,13 +403,6 @@ function FrontierPanel({ f }: { f: Frontier | null }) {
           note={`vs ${num(f.points[0].people_reached)} unconstrained`}
         />
       </div>
-
-      <div className="note">
-        Priority block groups are the {f.priority_definition}. In this AOI the most
-        cost-effective block groups are largely the most sensitive ones, so efficiency and equity
-        are aligned at realistic budgets — the floor only starts costing anything above{" "}
-        {slackTo}%.
-      </div>
     </>
   );
 }
@@ -461,10 +434,10 @@ function ProvenancePanel({ r }: { r: ProvenanceReport | null }) {
       <Head
         note={
           <>
-            Every number the model uses, and where it came from.{" "}
-            <b>{r.citation_pending.length} of {r.values.length} still lack a citation</b> — they
-            are placeholders we chose, not measurements, and the hatched stamps mark them
-            wherever they appear.
+            <b>
+              {r.citation_pending.length} of {r.values.length}
+            </b>{" "}
+            values still lack a citation — placeholders, not measurements.
           </>
         }
       >
@@ -526,9 +499,7 @@ function ProvenancePanel({ r }: { r: ProvenanceReport | null }) {
         </table>
       </div>
 
-      <Head note="Calculations this tool refuses to perform, and why. Each would require data that does not exist in this workspace.">
-        Deliberately not computed
-      </Head>
+      <Head>Deliberately not computed</Head>
       <div style={{ display: "grid", gap: 8 }}>
         {r.refused.map((x) => (
           <div key={x.key} className="panel" style={{ padding: "10px 12px" }}>

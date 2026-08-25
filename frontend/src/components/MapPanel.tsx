@@ -188,7 +188,6 @@ export default function MapPanel({
   // A blank basemap must never pass as "no data here" — that is a claim about Atlanta, not a
   // report of a failed render.
   const [layerError, setLayerError] = useState<string | null>(null);
-  const [drawn, setDrawn] = useState<number | null>(null);
 
   /* ---------------- init ---------------- */
   useEffect(() => {
@@ -335,7 +334,6 @@ export default function MapPanel({
         }
 
         installed = true;
-        setDrawn(fc.features.length);
         setLayerError(null);
         return true;
       } catch (err) {
@@ -382,6 +380,36 @@ export default function MapPanel({
     <div style={{ position: "relative", flex: 1, minHeight: 0 }}>
       <div ref={box} style={{ position: "absolute", inset: 0 }} />
 
+      {/* Empty / failed-fetch state. A blank basemap must read as "no data yet", never as a claim
+          that Atlanta has no heat — and it says plainly that the data is fetched, not baked in. */}
+      {!aoi && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 4,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+            background: "rgba(231, 232, 226, 0.72)",
+          }}
+        >
+          <div className="panel" style={{ padding: "16px 18px", maxWidth: 330 }}>
+            <div className="eyebrow" style={{ marginBottom: 7 }}>
+              No block groups loaded
+            </div>
+            <div style={{ fontSize: 11.5, color: "var(--ink-2)", lineHeight: 1.55 }}>
+              Geometry and every figure stream from the backend at{" "}
+              <b className="mono" style={{ color: "var(--ink)" }}>
+                localhost:8000
+              </b>{" "}
+              — nothing is baked in. If the map stays empty, start the backend.
+            </div>
+          </div>
+        </div>
+      )}
+
       {layerError && (
         <div
           className="panel warn mono"
@@ -395,8 +423,7 @@ export default function MapPanel({
             fontSize: 10.5,
           }}
         >
-          MAP LAYERS FAILED TO RENDER — the block groups are not drawn below. The numbers in the
-          panels are unaffected. Error: {layerError}
+          Map layers failed to render — panel figures are unaffected. {layerError}
         </div>
       )}
 
@@ -422,8 +449,8 @@ export default function MapPanel({
           style={{ marginTop: 7, padding: "7px 9px", fontSize: 10, color: "var(--ink-2)" }}
         >
           {mode === "need"
-            ? "Exposure everywhere. No spending decision implied."
-            : `${funded} of ${total} block groups funded · ${total - funded} receive nothing`}
+            ? "Heat exposure — where the need is"
+            : `${funded} of ${total} funded · ${total - funded} get nothing`}
         </div>
       </div>
 
@@ -475,21 +502,6 @@ export default function MapPanel({
             not funded
           </div>
         )}
-
-        {/* Says out loud whether the geometry reached the canvas, so "blank map" and "no data"
-            can never be confused. */}
-        <div
-          className="mono"
-          style={{
-            marginTop: 8,
-            fontSize: 9,
-            color: drawn ? "var(--ink-3)" : "var(--flag)",
-          }}
-        >
-          {drawn === null
-            ? "geometry not drawn yet"
-            : `${drawn} polygons drawn${fitted.current ? " · fitted to AOI" : ""}`}
-        </div>
 
         <button
           className="mono"

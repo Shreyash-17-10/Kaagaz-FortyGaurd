@@ -14,7 +14,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Analysis from "@/components/Analysis";
 import Controls, { type ControlState } from "@/components/Controls";
 import MapPanel, { type MapMode } from "@/components/MapPanel";
-import { Figure, Stamp } from "@/components/Stamp";
+import { Figure } from "@/components/Stamp";
 import {
   type AoiResponse,
   type Baselines,
@@ -67,20 +67,22 @@ function AnimatedNumber({
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (reducedMotion()) {
-      curRef.current = value;
-      fromRef.current = value;
-      setDisplay(value);
-      return;
-    }
-    const start = performance.now();
     const startVal = fromRef.current;
     const delta = value - startVal;
-    if (Math.abs(delta) < 1e-9) {
+
+    // Reduced motion, or a change too small to see: snap to the target on the next frame rather
+    // than tweening. The rAF matters — setting state synchronously in an effect body cascades
+    // renders; scheduling it for the next frame is imperceptible and keeps the effect clean.
+    if (reducedMotion() || Math.abs(delta) < 1e-9) {
       curRef.current = value;
-      setDisplay(value);
-      return;
+      fromRef.current = value;
+      rafRef.current = requestAnimationFrame(() => setDisplay(value));
+      return () => {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      };
     }
+
+    const start = performance.now();
     const step = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
       const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
@@ -183,6 +185,9 @@ export default function Page() {
     } finally {
       if (seq === runSeq.current) setBusy(false);
     }
+    // `weights` is rebuilt from `s` every render, so depending on `s` alone is intentional —
+    // listing `weights` would recreate `run` each render for no behavioural gain.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s]);
 
   // Live: recompute on any scenario-affecting control, debounced so a slider drag fires one
@@ -205,14 +210,7 @@ export default function Page() {
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <Controls
-        s={s}
-        set={set}
-        onRun={run}
-        busy={busy}
-        locationBlind={s.objective === "max_effective_area"}
-        mixPredetermined={(plan?.mix_predetermined?.length ?? 0) > 0}
-      />
+      <Controls s={s} set={set} onRun={run} busy={busy} />
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         {/* In-flight indicator: a live number must never be mistaken for a stale one. */}
@@ -263,7 +261,7 @@ function Kpis({ plan, busy }: { plan: Plan | null; busy: boolean }) {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+        gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
         gap: 12,
         padding: "14px 18px",
         borderBottom: "1px solid var(--rule)",
@@ -320,30 +318,6 @@ function Kpis({ plan, busy }: { plan: Plan | null; busy: boolean }) {
             : ""
         }
       />
-
-      {/* Prints the refusal in the same slot, at the same weight, so the absence is as visible
-          as a number would have been. */}
-      <div className="panel" style={{ padding: "12px 13px", minWidth: 0 }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: 8,
-            marginBottom: 8,
-          }}
-        >
-          <span className="eyebrow">Temperature reduction</span>
-          <Stamp p="Refused" />
-        </div>
-        <div className="figure" style={{ color: "var(--ink-3)" }}>
-          n/a
-        </div>
-        <div className="quiet" style={{ marginTop: 7, fontSize: 10.5, lineHeight: 1.45 }}>
-          {plan?.temperature_note ??
-            "Not computed: no validated cooling coefficient exists in this workspace."}
-        </div>
-      </div>
 
       {plan && plan.warnings.length > 0 && (
         <div style={{ gridColumn: "1 / -1", display: "grid", gap: 6 }}>
