@@ -26,7 +26,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 
-import config
+from backend import config
 import data
 import exposure
 import interventions as iv
