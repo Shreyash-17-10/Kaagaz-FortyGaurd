@@ -1,2 +1,12 @@
+[project]
+name = "heatroi-backend"
+version = "0.1.0"
+description = "FastAPI backend"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic"
+]
+
 [tool.vercel]
 entrypoint = "backend.main:app"
