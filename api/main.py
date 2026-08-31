@@ -31,20 +31,11 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 
-try:
-    import config
-except ImportError:
-    from backend import config
-
-try:
-    import data
-    import exposure
-    import interventions as iv
-    import optimize as op
-except ImportError:
-    from backend import data, exposure
-    from backend import interventions as iv
-    from backend import optimize as op
+import config
+import data
+import exposure
+import interventions as iv
+import optimize as op
 
 app = FastAPI(
     title="HeatROI API",

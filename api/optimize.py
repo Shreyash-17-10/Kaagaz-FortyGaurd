@@ -44,12 +44,8 @@ from typing import Dict, List, Optional, Sequence
 import numpy as np
 import pandas as pd
 
-try:
-    import config
-    import interventions as iv
-except ImportError:
-    from backend import config
-    from backend import interventions as iv
+import config
+import interventions as iv
 
 # Trees and shade structures come in whole units; cool-roof coating is a continuous area.
 INTEGRAL = {"tree": True, "shade": True, "cool_roof": False}

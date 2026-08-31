@@ -47,14 +47,9 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 
-try:
-    import config
-    from config import (COST, CROWN_AREA_M2, INTERVENTIONS, LAND_AREA_TO_M2,
-                        ROOF_M2_PER_1000_POP, SHADE_SITES_PER_1000_POP, UNITS)
-except ImportError:
-    from backend import config
-    from backend.config import (COST, CROWN_AREA_M2, INTERVENTIONS, LAND_AREA_TO_M2,
-                                ROOF_M2_PER_1000_POP, SHADE_SITES_PER_1000_POP, UNITS)
+import config
+from config import (COST, CROWN_AREA_M2, INTERVENTIONS, LAND_AREA_TO_M2,
+                    ROOF_M2_PER_1000_POP, SHADE_SITES_PER_1000_POP, UNITS)
 
 CURRENCIES = ["radiant", "ambient"]
 
