@@ -1,13 +1,6 @@
-# HeatROI pipeline dependencies
-
-# HTTP + data wrangling (used by the ROI scoring, which runs anywhere)
-requests>=2.31
-pandas>=2.0
-numpy>=1.24
-openpyxl>=3.1
-
-# Geospatial join stage (Unified_grid.py). These pull in GDAL/GEOS system libs;
-# on macOS the easiest install is via conda-forge or `brew install gdal` first.
-geopandas>=0.14
-shapely>=2.0
-rasterstats>=0.19
+fastapi>=0.100.0
+uvicorn>=0.22.0
+pandas>=2.0.0
+numpy>=1.24.0
+pydantic>=2.0.0
+scipy>=1.10.0

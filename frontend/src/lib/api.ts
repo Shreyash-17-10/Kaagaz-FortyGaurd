@@ -5,7 +5,7 @@
  * the field — the refusal is part of the contract and the UI renders it.
  */
 
-export const API = process.env.NEXT_PUBLIC_API ?? "http://127.0.0.1:8000";
+export const API = process.env.NEXT_PUBLIC_API ?? "";
 
 export type Currency = "radiant" | "ambient";
 export type Objective =
