@@ -1,5 +1,6 @@
 # Secrets — never commit
 .env
+.env.local
 
 # Generated / large data artefacts
 data/wri_tree_opportunity.tif
@@ -13,16 +14,14 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
-
-# Frontend (Next.js) — regenerated locally, never commit
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/*.tsbuildinfo
-frontend/next-env.d.ts
-
-# Backend — local virtualenv
 backend/.venv/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
 
 # OS
 .DS_Store
