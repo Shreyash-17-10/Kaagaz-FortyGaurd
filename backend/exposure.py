@@ -32,7 +32,12 @@ from typing import Dict, Optional
 import numpy as np
 import pandas as pd
 
-from config import DEFAULT_WEIGHTS, EQUITY_COLS
+try:
+    import config
+    from config import DEFAULT_WEIGHTS, EQUITY_COLS
+except ImportError:
+    from backend import config
+    from backend.config import DEFAULT_WEIGHTS, EQUITY_COLS
 
 PR_EQUITY = ["pr_" + c for c in EQUITY_COLS]
 
