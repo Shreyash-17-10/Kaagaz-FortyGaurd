@@ -16,9 +16,17 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-ARTIFACT = os.path.join(HERE, "data", "aoi_blockgroups.geojson")
-if not os.path.exists(ARTIFACT):
-    ARTIFACT = os.path.join(ROOT, "data", "aoi_blockgroups.geojson")
+CWD = os.getcwd()
+
+CANDIDATES = [
+    os.path.join(HERE, "data", "aoi_blockgroups.geojson"),
+    os.path.join(ROOT, "data", "aoi_blockgroups.geojson"),
+    os.path.join(CWD, "backend", "data", "aoi_blockgroups.geojson"),
+    os.path.join(CWD, "data", "aoi_blockgroups.geojson"),
+    os.path.join(CWD, "data", "final_analysis_grid.geojson"),
+]
+
+ARTIFACT = next((p for p in CANDIDATES if os.path.exists(p)), CANDIDATES[0])
 
 REQUIRED = [
     "GEOID", "ua_name", "acs_pop", "land_area", "treecanopy", "tc_goal", "tc_gap",
