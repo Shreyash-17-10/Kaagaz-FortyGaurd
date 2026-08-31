@@ -31,11 +31,20 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 
-from backend import config
-import data
-import exposure
-import interventions as iv
-import optimize as op
+try:
+    import config
+except ImportError:
+    from backend import config
+
+try:
+    import data
+    import exposure
+    import interventions as iv
+    import optimize as op
+except ImportError:
+    from backend import data, exposure
+    from backend import interventions as iv
+    from backend import optimize as op
 
 app = FastAPI(
     title="HeatROI API",
@@ -46,9 +55,9 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["*"],
     allow_credentials=False,
-    allow_methods=["GET", "POST"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 

@@ -15,7 +15,10 @@ import numpy as np
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
 ARTIFACT = os.path.join(HERE, "data", "aoi_blockgroups.geojson")
+if not os.path.exists(ARTIFACT):
+    ARTIFACT = os.path.join(ROOT, "data", "aoi_blockgroups.geojson")
 
 REQUIRED = [
     "GEOID", "ua_name", "acs_pop", "land_area", "treecanopy", "tc_goal", "tc_gap",
